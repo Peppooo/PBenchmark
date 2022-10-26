@@ -10,6 +10,7 @@
 #include <chrono>
 #include <ctime>
 #include <string>
+#include <conio.h>
 
 using namespace std;
 
@@ -68,27 +69,27 @@ int main(int argc, char* argv[]) {
         for (int i = 1; i < argc; i++) {
             //cout << argv[i] << endl;
             if (string(argv[i]) == "-threads" or string(argv[i]) == "-t") {
-                if (argc >= i + 1) {
+                if (argc < i + 1) {
                     cout << "Expected argument after \"" << argv[i] << "\"";
                     exit(1);
                 }
-                threadstocreate = int(argv[i + 1]);
+                threadstocreate = atoi(argv[i + 1]);
                 i++;
             }
             else if (string(argv[i]) == "-primes" or string(argv[i]) == "-p") {
-                if (argc >= i + 1) {
+                if (argc <= i + 1) {
                     cout << "Expected argument after \"" << argv[i] << "\"";
                     exit(1);
                 }
-                prime_numbers_to_check = int(argv[i + 1]);
+                prime_numbers_to_check = atoi(argv[i + 1]);
                 i++;
             }
             else if (string(argv[i]) == "-repeat" or string(argv[i]) == "-r") {
-                if (argc >= i + 1) {
+                if (argc <= i + 1) {
                     cout << "Expected argument after \"" << argv[i] << "\"";
                     exit(1);
                 }
-                tests = int(argv[i + 1]);
+                tests = atoi(argv[i + 1]);
                 i++;
             }
             else if (string(argv[i]) == "-help" or string(argv[i]) == "-h") {
@@ -108,13 +109,14 @@ int main(int argc, char* argv[]) {
         times.push_back(execute_benchmark(threadstocreate, prime_numbers_to_check));
     }
     lower_time = *min_element(times.begin(), times.end());
-    cout << lower_time << endl;
+    cout << lower_time << endl << endl << "Press ENTER to restart the benchmark";
     ofstream benchmarks_results;
     benchmarks_results.open("benchmarks.log", ios_base::app);
     time_t now = time(0);
     string time = ctime(&now); time.erase(std::remove(time.begin(), time.end(), '\n'), time.cend());
     benchmarks_results << "[" << time << "]: threads (" << threadstocreate << "); prime Numbers (" << prime_numbers_to_check << "); best time (" << lower_time << ");" << endl;
     benchmarks_results.close();
-    {char i; cin >> i; }
+    {char c; c = _getch(); }
+    system("cls");
     main(argc, argv);
 }
