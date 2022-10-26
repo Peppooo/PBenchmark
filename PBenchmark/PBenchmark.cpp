@@ -16,7 +16,6 @@ using namespace std;
 bool check_x_prime_numbers(int x) {
     bool flag=false;
     for (int num = 0; num < x; num++) {
-        //SetConsoleTitleA((string("checking ").append(std::to_string(num)).c_str()));
         if (num <= 1) flag=false;
         if (num <= 3)  flag=true;
 
@@ -43,7 +42,7 @@ double execute_benchmark(int threadstocreate, int prime_numbers_to_check) {
     for (int i = 0; i < threadstocreate; i++) {
         operating_threads.push_back(thread(check_x_prime_numbers, prime_numbers_to_check));
     }
-    for (int i = 0; i < threadstocreate; i++) {
+    for (int i = 0; i < threadstocreate + 1; i++) {
         operating_threads[i].join();
     }
     QueryPerformanceCounter(&end);
@@ -52,27 +51,70 @@ double execute_benchmark(int threadstocreate, int prime_numbers_to_check) {
 
 int main(int argc, char* argv[]) {
     double lower_time = 0;
-    int prime_numbers_to_check;
-    int threadstocreate;
-    int tests;
+    int prime_numbers_to_check = 0;
+    int threadstocreate = 0;
+    int tests = 0;
     vector<double> times;
-    cout << "Insert how many prime numbers to check (per thread): ";
-    cin >> prime_numbers_to_check;
-    cout << "How many threads: ";
-    cin >> threadstocreate;
-    cout << "How many tests: ";
-    cin >> tests;
-    // execute benchmarks
-    for (int i = 0; i < tests; i++) {
-        times.push_back(execute_benchmark(threadstocreate,prime_numbers_to_check));
+    if (argc == 1) {
+        cout << "Insert how many prime numbers to check (per thread): ";
+        cin >> prime_numbers_to_check;
+        cout << "How many threads: ";
+        cin >> threadstocreate;
+        cout << "How many tests: ";
+        cin >> tests;
     }
-    lower_time = times[ranges::distance(times.begin(), ranges::min_element(times))];
-    cout << lower_time;
+    else
+    {
+        for (int i = 1; i < argc; i++) {
+            //cout << argv[i] << endl;
+            if (string(argv[i]) == "-threads" or string(argv[i]) == "-t") {
+                if (argc >= i + 1) {
+                    cout << "Expected argument after \"" << argv[i] << "\"";
+                    exit(1);
+                }
+                threadstocreate = int(argv[i + 1]);
+                i++;
+            }
+            else if (string(argv[i]) == "-primes" or string(argv[i]) == "-p") {
+                if (argc >= i + 1) {
+                    cout << "Expected argument after \"" << argv[i] << "\"";
+                    exit(1);
+                }
+                prime_numbers_to_check = int(argv[i + 1]);
+                i++;
+            }
+            else if (string(argv[i]) == "-repeat" or string(argv[i]) == "-r") {
+                if (argc >= i + 1) {
+                    cout << "Expected argument after \"" << argv[i] << "\"";
+                    exit(1);
+                }
+                tests = int(argv[i + 1]);
+                i++;
+            }
+            else if (string(argv[i]) == "-help" or string(argv[i]) == "-h") {
+                cout << "Pbenchmark" << endl
+                    << "-threads, -t\t\tinsert how many threads to work on during the benchmark." << endl
+                    << "-primes,-p\t\tinsert how many prime numbers to check per thread" << endl
+                    << "-repeat, -r\t\tinsert how many time the benchmark will repeat the test for better accuracy";
+                exit(0);
+            }
+            else {
+                cout << "Unknown argument \"" << argv[i] << "\", type " << argv[0] << " -help or -h for getting help";
+                exit(1);
+            }
+        }
+    }
+    for (int i = 0; i < tests; i++) {
+        times.push_back(execute_benchmark(threadstocreate, prime_numbers_to_check));
+    }
+    lower_time = *min_element(times.begin(), times.end());
+    cout << lower_time << endl;
     ofstream benchmarks_results;
     benchmarks_results.open("benchmarks.log", ios_base::app);
     time_t now = time(0);
     string time = ctime(&now); time.erase(std::remove(time.begin(), time.end(), '\n'), time.cend());
     benchmarks_results << "[" << time << "]: threads (" << threadstocreate << "); prime Numbers (" << prime_numbers_to_check << "); best time (" << lower_time << ");" << endl;
     benchmarks_results.close();
-    main(NULL, NULL);
+    {char i; cin >> i; }
+    main(argc, argv);
 }
