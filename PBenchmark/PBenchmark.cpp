@@ -42,7 +42,7 @@ double execute_benchmark(int threadstocreate, int prime_numbers_to_check) {
     for (int i = 0; i < threadstocreate; i++) {
         operating_threads.push_back(thread(check_x_prime_numbers, prime_numbers_to_check));
     }
-    for (int i = 0; i < threadstocreate + 1; i++) {
+    for (int i = 0; i < threadstocreate; i++) {
         operating_threads[i].join();
     }
     QueryPerformanceCounter(&end);
